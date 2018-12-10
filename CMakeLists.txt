@@ -3,4 +3,4 @@ project(Lab6_CRS)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(Lab6_CRS main.cpp birthdatesNode.h hashTable.h)
+add_executable(Lab6_CRS main.cpp hashEntry.h hashTable.h)
