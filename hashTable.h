@@ -9,6 +9,7 @@
 #include <cmath>
 #include <fstream>
 #include <cstring>
+#include <string>
 
 #define SIZE 13
 
@@ -43,7 +44,7 @@ public:
     // method that searches for an element in the table
     // returns position of element if found
     // else returns false
-    int search(int element);
+    int search(std::string element);
 
 
     // method to remove an element from the table
@@ -56,11 +57,7 @@ public:
 //Public Definitions
 
 bool hashTable::isFull() {
-    if(elementCount == SIZE){
-        return true;
-    }else{
-        return false;
-    }
+    return elementCount == SIZE;
 }
 
 int hashTable::hashFunction(int element) {
@@ -113,10 +110,9 @@ void hashTable::insert(int element) {  //TODO: change ints to strings
         }
 
     }
-    return;
 }
 
-int hashTable::search(int element) {
+int hashTable::search(std::string element) {
     bool found = false;
 
     int position = this->hashFunction(element);
@@ -167,7 +163,6 @@ void hashTable::remove(int element) {
     }else{
         std::cout<<"\nElement is not present in the Hash Table";
     }
-    return;
 }
 
 //End public definitions
