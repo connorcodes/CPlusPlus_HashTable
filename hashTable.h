@@ -12,19 +12,14 @@
 
 #include "hashEntry.h"
 
-const int DEFAULT_TABLE_SIZE = 128;
-
 template<typename K, typename V>
 class hashTable {
 private:
     double size;
     hashEntry<K, V> **table;
-    int capacity;
-    int collisions;
-    double maxLoadFactor;
-    int threshold;
-    int maxSize;
     int tableSize;
+    int collisions;
+    double maxLoad;
 
 public:
     hashTable();
@@ -36,8 +31,6 @@ public:
     bool isPrime(int n);
 
     void insert(K key, V value);
-
-    //TODO: void remove(K key);
 
     void display();
 
@@ -55,13 +48,13 @@ public:
 
 template<typename K, typename V>
 hashTable<K, V>::hashTable() {
-    tableSize = 12;
+    tableSize = 13;
     size = 0;
-    capacity = .75;
-    table = new hashEntry<K, V> *[capacity];
+    maxLoad = .75;
+    table = new hashEntry<K, V> *[tableSize];
     collisions = 0;
 
-    for (int i = 0; i < capacity; i++)
+    for (int i = 0; i < tableSize; i++)
         table[i] = nullptr;
 }
 
@@ -73,18 +66,18 @@ hashTable<K, V>::~hashTable() {
 
 template<typename K, typename V>
 int hashTable<K, V>::compute(std::string d) {
-    int sum = 0; // sum of all the digits in date
-    int s = d.length(); // length of date string
-    for (int i = 0; i < s; i++) //traversing date string
+    int sum = 0;
+    int s = d.length();
+    for (int i = 0; i < s; i++)
     {
-        if (d[i] != '-') //if the char is not a hyphen, add it to sum
+        if (d[i] != '-')
         {
-            sum += (d[i] - 48); //ascii, numbers start from 48
+            sum += (d[i] - 48);
         }
     }
-    std::string inter = std::to_string(sum); //string of intermediate sum
+    std::string inter = std::to_string(sum);
 
-    int size2 = inter.length(); //length of inter
+    int size2 = inter.length();
     if (size2 == 1)
         return sum;
     int num = 0;
@@ -93,13 +86,12 @@ int hashTable<K, V>::compute(std::string d) {
 
         while (size2 > 1) {
             num = 0;
-            //cout << size2 << endl;
+
             for (int t = 0; t < size2; t++) {
                 num += (inter[t] - 48);
             }
             inter = std::to_string(num);
             size2 = inter.length();
-            //cout << size2 << endl;
 
         }
     }
@@ -128,45 +120,37 @@ int hashTable<K, V>::nextPrime(int n) {
     return n;
 }
 
-/*
-	A function to insert the name and birthday
-	@param key - a string of the birthday
-	@param value - a string name
-	if Load factor is greater than max load factor the capacity is increased to the next prime number
-	if the value at the hashIndex is a nullptr insert the value
-	while there is no empty space go through quadratic probing to find a new spot to insert the value
-*/
 template<typename K, typename V>
 void hashTable<K, V>::insert(K key, V value) {
-    // if loadfactor is greater than or equal to 75% then increase the capacity by double
-    if ((size / capacity) >= maxLoadFactor) {
-        int newCapacity = nextPrime(capacity);
-        auto **newTable = new hashEntry<K, V> *[newCapacity];
-        for (int i = 0; i < capacity; i++) {
+
+    if ((size / tableSize) >= maxLoad) {
+        int newCapacity = nextPrime(tableSize+1);
+        hashEntry<K, V>**newTable = new hashEntry<K, V>*[newCapacity];
+        for (int i = 0; i < tableSize; i++) {
             newTable[i] = table[i];
         }
-        for (int i = capacity; i < newCapacity; i++) {
-            newTable[i] = nullptr;
+        for (int i = 0; i < tableSize; i++) {
+            newTable[i] = table[i];
         }
         table = newTable;
-        capacity = newCapacity;
+        tableSize = newCapacity;
     }
     hashEntry<K, V> *temp = new hashEntry<K, V>(key, value);
     int hashed = compute(key);
-    // Apply hash function to find index for given key
-    int hashIndex = hashed % capacity;
+
+    int hashIndex = hashed % tableSize;
     int NUM = 1;
-    //find next free space
-    while (table[hashIndex] != nullptr && NUM * NUM < capacity && table[hashIndex]->getKey() != key) {
-        //hashIndex = hashed % capacity;
+
+    while (table[hashIndex] != nullptr) {
+
         hashIndex += (NUM * NUM);
-        hashIndex = hashIndex % capacity;
+        hashIndex = hashIndex % tableSize;
         NUM++;
         collisions++;
     }
 
     //if new node to be inserted increase the current size
-    if (table[hashIndex] == NULL)size++;
+    if (table[hashIndex] == NULL) size++;
     table[hashIndex] = temp;
 
     return;
@@ -175,23 +159,22 @@ void hashTable<K, V>::insert(K key, V value) {
 template<typename K, typename V>
 V hashTable<K, V>::find(K key) {
     bool found = false;
-    //int countSmthng=0;
-    size_t hashIndex = static_cast<size_t>(compute(key));
-    hashIndex = hashIndex % capacity;
+    size_t hashIndex = compute(key);
+    hashIndex = hashIndex % tableSize;
     int NUM = 1;
-    while (!found && NUM * NUM < capacity && table[hashIndex] != nullptr) {
+    while (!found && table[hashIndex] != nullptr) {
 
         found = table[hashIndex]->getKey() == key;
-        if (!found && NUM * NUM < capacity) {
+        if (!found) {
             hashIndex += NUM * NUM;
-            hashIndex = hashIndex % capacity;
+            hashIndex = hashIndex % tableSize;
             NUM++;
         }
     }
     if (found) {
         return table[hashIndex]->getValue();
     } else
-        return "an Invalid Data";
+        return "invalid value";
 }
 
 template<typename K, typename V>
@@ -201,66 +184,21 @@ double hashTable<K, V>::mapSize() {
 
 template<typename K, typename V>
 void hashTable<K, V>::display() {
-    std::cout << "See the capacity in display  " << capacity << std::endl;
-    for (int i = 0; i < capacity; i++) {
+    std::cout << "Table size: " << tableSize << std::endl;
+    for (int i = 0; i < tableSize; i++) {
         if (table[i] != nullptr)
-            std::cout << "Key = " << table[i]->getKey() << " Value = " << table[i]->getValue() << std::endl;
+            std::cout << "Key: " << table[i]->getKey() << " Value: " << table[i]->getValue() << std::endl;
     }
 }
 
 template<typename K, typename V>
 int hashTable<K, V>::capacityF() {
-    return capacity;
+    return tableSize;
 }
 
 template<typename K, typename V>
 int hashTable<K, V>::getCollisions() {
     return collisions++;
 }
-
-/*template<typename K, typename V>
-void hashTable<K, V>::remove(K key) {
-
-    int hash = (key % tableSize);
-
-    if (table[hash] != NULL) {
-
-        hashEntry *prevEntry = NULL;
-
-        hashEntry *entry = table[hash];
-
-        while (entry->getNext() != NULL && entry->getKey() != key) {
-
-            prevEntry = entry;
-
-            entry = entry->getNext();
-
-        }
-
-        if (entry->getKey() == key) {
-
-            if (prevEntry == NULL) {
-
-                hashEntry *nextEntry = entry->getNext();
-
-                delete entry;
-
-                table[hash] = nextEntry;
-
-            } else {
-
-                hashEntry *next = entry->getNext();
-
-                delete entry;
-
-                prevEntry->setNext(next);
-
-            }
-
-            size--;
-
-        }
-
-    }*/
 
 #endif //LAB6_CRS_HASHTABLE_H

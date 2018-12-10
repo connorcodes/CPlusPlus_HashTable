@@ -13,17 +13,12 @@
 
 #include "hashtable.h"
 
-//template <typename birthday, typename name> // K = bday, V = name
 template<typename K, typename V>
 class hashEntry {
 private:
     V value;
     K key;
 public:
-   /* hashEntry(int key, int value) {
-        this->key = key;
-        this->value = value;
-    }*/
 
     hashEntry();
 

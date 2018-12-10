@@ -15,66 +15,75 @@ using namespace std;
 int main()
 {
     ifstream infile;
-    string location="bst_testFile.txt";
-    infile.open(location.c_str());
+    string location;
 
-    auto *node = new hashEntry<string, string>;
-    auto *table = new hashTable<string, string>;
+    //getFile: ;
+    cout << "Enter location of file (example: drive//path//project//txt file): ";
+    getline(cin, location);
 
-    string name, date;
-
-    while (!infile.eof())
+    if (infile.fail())
     {
+        cout << "Incorrect location, try again: ";
+      //  goto getFile;
+        getline(cin, location);
+    } else
+        infile.open(location.c_str());
+
+    hashEntry<string, string> *Hnode = new hashEntry<string, string>;
+    hashTable<string, string> *Htable = new hashTable<string, string>;
+
+    string name;
+    string birthdate;
+
+    while (!infile.eof()) {
+        //Retrieve data
         getline(infile, name);
-        getline(infile, date);
-        node->setKey(date);
-        node->setValue(name);
-        table->insert(date, name);
+        getline(infile, birthdate);
+
+        //Send data to hashTable and hashEntry
+        Hnode->setKey(birthdate);
+        Hnode->setValue(name);
+        Htable->insert(birthdate, name);
     }
-
     infile.close();
-    table->display();
 
-    cout << "Load factor: "<< table->mapSize() / table->capacityF() * 100 << endl;
-    cout << "Collisions: " << table->getCollisions() << endl;
+    //Displays the hashTable
+    Htable->display();
 
-    string userDate;
-    cout << "Enter a birthdate (Ex: 1974-08-24): ";
-    getline(cin, userDate);
+    //Displays hashTable stats
+    cout << "Load factor: "<< Htable->mapSize() / Htable->capacityF() * 100 << endl;
+    cout << "Collisions:" << Htable->getCollisions() << endl;
 
-    string value = table->find(userDate);
+    int choice=0;
 
-    cout << "Name: " << value << endl;
+    // do the menu while choice is equal to 1
+    do {
+        string userDate=" ";
 
-    if (value == "invalid data") {
-        char choice;
+        cout << "Enter the birthday of the person in YYYY-MM-DD format (Ex: 1974-08-24): ";
+        cin >> userDate;
 
-        cout << "Check again? (Y/N)" << endl;
+        cout << "The Name of the Birthday that you entered is " << Htable->find(userDate) << endl;
+
+        cout << "1. Would you like to search another Birthday (type 1): " << endl;
+        cout << "2. End the program" << endl;
         cin >> choice;
 
-        string value2, inputDate;
+    } while (choice == 1);
 
-        switch (choice) {
-            case 'y':
+   /* char rpt;
+    do {
+            string inputBday=" ";
 
-                cout << "Enter a birthdate: ";
-                getline(cin, inputDate);
-                value2 = table->find(inputDate);
-                cout << value2 << " has that birthday!" <<endl;
+            cout << "Enter a birthdate (YYYY-MM-DD): ";
+            cin >> inputBday;
 
-                break;
+            cout << "That is: " << Htable->find(inputBday) << "'s birthday! " << endl;
 
-            case 'n':
-                cout << " Good bye!" << endl;
+        cout<<"\nDo another operation? Y/N : " << endl;
+        cin >> rpt;
+    } while (rpt == 'Y');*/
 
-                break;
-
-            default:
-
-                break;
-        }
-    }
-
-    system("pause");
+    cout << "Now exiting. " << "Thank you for using Connor's hash table program!" << endl;
     return 0;
 }
