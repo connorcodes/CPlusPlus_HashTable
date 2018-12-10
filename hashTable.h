@@ -22,10 +22,9 @@ private:
     int capacity;
     int collisions;
     double maxLoadFactor;
-    float threshold;
+    int threshold;
     int maxSize;
     int tableSize;
-    // int size;
 
 public:
     hashTable();
@@ -38,7 +37,7 @@ public:
 
     void insert(K key, V value);
 
-    void remove(K key);
+    //TODO: void remove(K key);
 
     void display();
 
@@ -56,21 +55,14 @@ public:
 
 template<typename K, typename V>
 hashTable<K, V>::hashTable() {
-
-    tableSize = DEFAULT_TABLE_SIZE;
-    maxSize = 96;
+    tableSize = 12;
     size = 0;
     capacity = .75;
     table = new hashEntry<K, V> *[capacity];
     collisions = 0;
 
-    for (int i = 0; i < tableSize; i++)
+    for (int i = 0; i < capacity; i++)
         table[i] = nullptr;
-
-
-    this->maxLoad = capacity;
-
-    maxSize = (int) (tableSize * capacity);
 }
 
 
@@ -149,7 +141,7 @@ void hashTable<K, V>::insert(K key, V value) {
     // if loadfactor is greater than or equal to 75% then increase the capacity by double
     if ((size / capacity) >= maxLoadFactor) {
         int newCapacity = nextPrime(capacity);
-        hashEntry<K, V> **newTable = new hashEntry<K, V> *[newCapacity];
+        auto **newTable = new hashEntry<K, V> *[newCapacity];
         for (int i = 0; i < capacity; i++) {
             newTable[i] = table[i];
         }
@@ -160,7 +152,7 @@ void hashTable<K, V>::insert(K key, V value) {
         capacity = newCapacity;
     }
     hashEntry<K, V> *temp = new hashEntry<K, V>(key, value);
-    int hashed = computeHash(key);
+    int hashed = compute(key);
     // Apply hash function to find index for given key
     int hashIndex = hashed % capacity;
     int NUM = 1;
@@ -184,7 +176,7 @@ template<typename K, typename V>
 V hashTable<K, V>::find(K key) {
     bool found = false;
     //int countSmthng=0;
-    size_t hashIndex = computeHash(key);
+    size_t hashIndex = static_cast<size_t>(compute(key));
     hashIndex = hashIndex % capacity;
     int NUM = 1;
     while (!found && NUM * NUM < capacity && table[hashIndex] != nullptr) {
@@ -226,16 +218,16 @@ int hashTable<K, V>::getCollisions() {
     return collisions++;
 }
 
-template<typename K, typename V>
+/*template<typename K, typename V>
 void hashTable<K, V>::remove(K key) {
 
     int hash = (key % tableSize);
 
     if (table[hash] != NULL) {
 
-        LinkedHashEntry *prevEntry = NULL;
+        hashEntry *prevEntry = NULL;
 
-        LinkedHashEntry *entry = table[hash];
+        hashEntry *entry = table[hash];
 
         while (entry->getNext() != NULL && entry->getKey() != key) {
 
@@ -249,7 +241,7 @@ void hashTable<K, V>::remove(K key) {
 
             if (prevEntry == NULL) {
 
-                LinkedHashEntry *nextEntry = entry->getNext();
+                hashEntry *nextEntry = entry->getNext();
 
                 delete entry;
 
@@ -257,7 +249,7 @@ void hashTable<K, V>::remove(K key) {
 
             } else {
 
-                LinkedHashEntry *next = entry->getNext();
+                hashEntry *next = entry->getNext();
 
                 delete entry;
 
@@ -269,6 +261,6 @@ void hashTable<K, V>::remove(K key) {
 
         }
 
-    }
+    }*/
 
 #endif //LAB6_CRS_HASHTABLE_H
